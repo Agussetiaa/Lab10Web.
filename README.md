@@ -49,6 +49,9 @@ $b->tampilWarna();
 ?>
 ```
 
+<img width="475" alt="image" src="https://github.com/Agussetiaa/Lab10Web./assets/115542822/c4cd1983-8bc0-4566-b19b-ce21ac515407">
+
+
 ## Class Library
 Class library merupakan pustaka kode program yang dapat digunakan bersama pada beberapa
 file yang berbeda (konsep modularisasi). Class library menyimpan fungsi-fungsi atau class
@@ -97,6 +100,8 @@ name='".$this->fields[$j]['name']."'></td></tr>";
 }
 ?>
 ```
+
+
 
 File tersebut tidak dapat dieksekusi langsung, karena hanya berisi deklarasi class. Untuk
 menggunakannya perlu dilakukan include pada file lain yang akan menjalankan dan harus
