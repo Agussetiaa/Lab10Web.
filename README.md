@@ -178,6 +178,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 ?>
 ```
 
+<img width="338" alt="image" src="https://github.com/Agussetiaa/Lab10Web./assets/115542822/a8860e4b-187f-4273-8c3b-7c89d509c328">
+
+
 ## Contoh lainnya untuk database connection dan query. Buat file dengan nama database.php
 ```
 <?php
