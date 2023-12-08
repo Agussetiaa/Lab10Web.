@@ -126,6 +126,8 @@ echo "</body></html>";
 ?>
 ```
 
+<img width="469" alt="image" src="https://github.com/Agussetiaa/Lab10Web./assets/115542822/d339c00d-643c-49c6-9cf8-5cfc1639bab0">
+
 ## Contoh lainnya untuk database connection dan query. Buat file dengan nama database.php
 ```
 <?php
