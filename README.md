@@ -61,44 +61,38 @@ object komponen untuk memudahkan dalam proses development aplikasi.
 Buat file baru dengan nama form.php
 ```
 <?php
-/**
-* Nama Class: Form
-* Deskripsi: CLass untuk membuat form inputan text sederhan
-**/
-class Form
-{
+class Form {
     private $fields = array();
     private $action;
     private $submit = "Submit Form";
     private $jumField = 0;
-    public function __construct($action, $submit)
-    {
+
+    public function __construct($action, $submit) {
         $this->action = $action;
         $this->submit = $submit;
     }
-    public function displayForm()
-    {
+
+    public function displayForm() {
         echo "<form action='".$this->action."' method='POST'>";
         echo '<table width="100%" border="0">';
         for ($j=0; $j<count($this->fields); $j++) {
-        echo "<tr><td
-align='right'>".$this->fields[$j]['label']."</td>";
-        echo "<td><input type='text'
-name='".$this->fields[$j]['name']."'></td></tr>";
-    }
+            echo "<tr><td align='right'>".$this->fields[$j]['label']."</td>";
+            echo "<td><input type='text' name='".$this->fields[$j]['name']."'></td></tr>";
+        }
         echo "<tr><td colspan='2'>";
         echo "<input type='submit' value='".$this->submit."'></td></tr>";
         echo "</table>";
+        echo "</form>";
     }
-    public function addField($name, $label)
-    {
+
+    public function addField($name, $label) {
         $this->fields [$this->jumField]['name'] = $name;
         $this->fields [$this->jumField]['label'] = $label;
-        $this->jumField ++;
-
+        $this->jumField++;
     }
 }
 ?>
+
 ```
 
 
@@ -111,22 +105,78 @@ dibuat instance object terlebih dulu.
 Buat file baru dengan nama form_input.php
 ```
 <?php
-/**
-* Program memanfaatkan Program 10.2 untuk membuat form inputan sederhana.
-**/
 include "form.php";
+include "Database.php";
+
 echo "<html><head><title>Mahasiswa</title></head><body>";
-$form = new Form("","Input Form");
-$form->addField("txtnim", "Nim");
-$form->addField("txtnama", "Nama");
-$form->addField("txtalamat", "Alamat");
-echo "<h3>Silahkan isi form berikut ini :</h3>";
+
+$form = new Form("process.php", "Submit");
+
+$form->addField("nim", "Nim");
+$form->addField("nama", "Nama");
+$form->addField("alamat", "Alamat");
+
+echo "<h3>Silakan isi formulir berikut ini:</h3>";
 $form->displayForm();
+
 echo "</body></html>";
+?>
+
+```
+
+<img width="541" alt="image" src="https://github.com/Agussetiaa/Lab10Web./assets/115542822/af7cd44b-042a-46d5-87d5-71726450deff">
+
+## Buat file baru dengan nama config.php
+```
+<?php
+return [
+    'host' => 'localhost',
+    'username' => 'root',
+    'password' => '',
+    'db_name' => 'lab10_database',
+];
 ?>
 ```
 
-<img width="469" alt="image" src="https://github.com/Agussetiaa/Lab10Web./assets/115542822/d339c00d-643c-49c6-9cf8-5cfc1639bab0">
+## Buat file baru dengan nama procces.php
+```
+<?php
+include "Database.php";
+
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    $nim = isset($_POST["nim"]) ? $_POST["nim"] : "";
+    $nama = isset($_POST["nama"]) ? $_POST["nama"] : "";
+    $alamat = isset($_POST["alamat"]) ? $_POST["alamat"] : "";
+
+    // Validasi data
+    if (empty($nim) || empty($nama) || empty($alamat)) {
+        echo "Semua field harus diisi.";
+    } else {
+        // Buat objek Database
+        $db = new Database();
+
+        // Contoh penggunaan metode insert
+        $data = array(
+            'nim' => $nim,
+            'nama' => $nama,
+            'alamat' => $alamat
+        );
+
+        $table = 'user_mobil';
+        $insert_result = $db->insert($table, $data);
+
+        if ($insert_result) {
+            echo "Data berhasil disimpan.";
+        } else {
+            echo "Gagal menyimpan data.";
+        }
+    }
+} else {
+    // Jika halaman diakses langsung, mungkin hendak redirect atau tampilkan pesan kesalahan.
+    echo "Akses tidak valid.";
+}
+?>
+```
 
 ## Contoh lainnya untuk database connection dan query. Buat file dengan nama database.php
 ```
@@ -137,80 +187,88 @@ class Database {
     protected $password;
     protected $db_name;
     protected $conn;
+
     public function __construct() {
         $this->getConfig();
-        $this->conn = new mysqli($this->host, $this->user, $this->password,
-        $this->db_name);
-    if ($this->conn->connect_error) {
-        die("Connection failed: " . $this->conn->connect_error);
+        $this->conn = new mysqli($this->host, $this->user, $this->password, $this->db_name);
+
+        if ($this->conn->connect_error) {
+            die("Koneksi gagal: " . $this->conn->connect_error);
+        }
     }
-}
+
     private function getConfig() {
-    include_once("config.php");
+        $config = include("config.php");
+
         $this->host = $config['host'];
         $this->user = $config['username'];
         $this->password = $config['password'];
         $this->db_name = $config['db_name'];
     }
+
     public function query($sql) {
         return $this->conn->query($sql);
     }
-    public function get($table, $where=null) { 
+
+    public function get($table, $where = null) {
         if ($where) {
-            $where = " WHERE ".$where;
+            $where = " WHERE " . $where;
+        }
+        $sql = "SELECT * FROM " . $table . $where;
+        $result = $this->conn->query($sql);
+        $data = $result->fetch_assoc();
+        return $data;
     }
-        $sql = "SELECT * FROM ".$table.$where;
-        $sql = $this->conn->query($sql);
-        $sql = $sql->fetch_assoc();
-        return $sql;
-    }
+
     public function insert($table, $data) {
         if (is_array($data)) {
-            foreach($data as $key => $val) {
-                $column[] = $key;
-                $value[] = "'{$val}'";
+            $columns = [];
+            $values = [];
+            foreach ($data as $key => $val) {
+                $columns[] = $key;
+                $values[] = "'{$val}'";
+            }
+            $columns = implode(",", $columns);
+            $values = implode(",", $values);
+
+            $sql = "INSERT INTO " . $table . " (" . $columns . ") VALUES (" . $values . ")";
+            $result = $this->conn->query($sql);
+
+            return $result === true;
         }
-        $columns = implode(",", $column);
-        $values = implode(",", $value);
-    }
-        $sql = "INSERT INTO ".$table." (".$columns.") VALUES (".$values.")";
-        $sql = $this->conn->query($sql);
-    if ($sql == true) {
-        return $sql;
-    } else {
         return false;
     }
-    }
-    public function update($table, $data, $where) {
-        $update_value = "";
-    if (is_array($data)) {
-        foreach($data as $key => $val) {
-    $update_value[] = "$key='{$val}'"
-    }
-    $update_value = implode(",", $update_value);
-    }
-        $sql = "UPDATE ".$table." SET ".$update_value." WHERE ".$where;
-        $sql = $this->conn->query($sql);
-    if ($sql == true) {
-        return true;
-    } else {
 
-    return false;
-    }
-    }
-    public function delete($table, $filter) {
-        $sql = "DELETE FROM ".$table." ".$filter;
-        $sql = $this->conn->query($sql);
-        if ($sql == true) {
-            return true;
-        } else {
-            return false;
+    public function update($table, $data, $where) {
+        if (is_array($data)) {
+            $update_value = [];
+            foreach ($data as $key => $val) {
+                $update_value[] = "$key='{$val}'";
+            }
+
+            $update_value = implode(",", $update_value);
+
+            $sql = "UPDATE " . $table . " SET " . $update_value . " WHERE " . $where;
+            $result = $this->conn->query($sql);
+
+            return $result === true;
         }
+        return false;
+    }
+
+    public function delete($table, $filter) {
+        $sql = "DELETE FROM " . $table . " " . $filter;
+        $result = $this->conn->query($sql);
+
+        return $result === true;
     }
 }
 ?>
+
 ```
 
 ## Pertanyaan dan Tugas
 Implementasikan konsep modularisasi pada kode program pada praktukum sebelumnya
 dengan menggunakan class library untuk form dan database connection.
+
+
